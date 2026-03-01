@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  password    String
+  createdAt   DateTime     @default(now())
+  programmes  Programme[]
+  subscribers Subscriber[]
+}
+
+model Programme {
+  id          String             @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    ProgrammeMessage[]
+  subscribers Subscriber[]
+}
+
+model ProgrammeMessage {
+  id           String         @id @default(cuid())
+  content      String
+  dayOffset    Int
+  sendHour     Int            @default(9)
+  order        Int
+  programmeId  String
+  programme    Programme      @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  scheduledSms ScheduledSms[]
+}
+
+model Subscriber {
+  id           String         @id @default(cuid())
+  phone        String
+  name         String?
+  createdAt    DateTime       @default(now())
+  isActive     Boolean        @default(true)
+  unsubToken   String         @unique @default(cuid())
+  programmeId  String
+  programme    Programme      @relation(fields: [programmeId], references: [id])
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  scheduledSms ScheduledSms[]
+
+  @@unique([phone, programmeId])
+}
+
+model ScheduledSms {
+  id           String           @id @default(cuid())
+  subscriberId String
+  subscriber   Subscriber       @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  messageId    String
+  message      ProgrammeMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  scheduledFor DateTime
+  sentAt       DateTime?
+  status       String           @default("pending")
+  twilioSid    String?
+  createdAt    DateTime         @default(now())
+}
