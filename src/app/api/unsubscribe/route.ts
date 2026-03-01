@@ -24,7 +24,6 @@ export async function GET(req: Request) {
     data: { status: 'cancelled' },
   })
 
-  return NextResponse.redirect(
-    new URL(`/unsubscribe/success`, req.url)
-  )
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gospel-reach.vercel.app'
+  return NextResponse.redirect(new URL('/unsubscribe', appUrl))
 }
