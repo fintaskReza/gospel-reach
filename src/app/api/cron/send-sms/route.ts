@@ -33,10 +33,7 @@ export async function GET(req: Request) {
 
   for (const sms of pending) {
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gospel-reach.vercel.app'
-      const unsubUrl = `${appUrl}/unsubscribe?token=${sms.subscriber.unsubToken}`
-
-      const body = `${sms.message.content}\n\nReply STOP to unsubscribe or visit: ${unsubUrl}`
+      const body = `${sms.message.content}\n\nReply STOP to unsubscribe.`
 
       const twilioSid = await sendSms(sms.subscriber.phone, body)
 
